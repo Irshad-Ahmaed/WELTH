@@ -1,3 +1,4 @@
+// "use server"
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
@@ -33,6 +34,7 @@ export async function createAccount(data) {
             throw new Error("Invalid balance account");
         }
 
+        // Check if this is the user's first account
         const existingAccount = await db.account.findMany({
             where:{userId: user.id}
         });
@@ -56,6 +58,7 @@ export async function createAccount(data) {
             },
         });
 
+        // Next.js doesn't support decimal value before returning we need to Serialized the value
         const serializedAccount = serializedTransaction(account);
 
         // It's allow you to call all api calls ones again in dashboard page // Kind of refresh
