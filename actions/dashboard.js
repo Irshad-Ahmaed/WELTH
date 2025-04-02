@@ -1,21 +1,8 @@
 "use server";
+import { serializedTransaction } from "@/app/lib/serializedTransaction";
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-
-const serializedTransaction = (obj) => {
-    const serialized = { ...obj };
-
-    if (obj.balance) {
-        serialized.balance = obj.balance.toNumber();
-    }
-
-    if (obj.amount) {
-        serialized.amount = obj.amount.toNumber();
-    }
-
-    return serialized;
-};
 
 export async function createAccount(data) {
     try {
