@@ -14,8 +14,8 @@ const AccountsPage = async ({ params }) => {
   const { transactions, ...account } = accountData;
 
   return (
-    <div className=''>
-      <div className='flex items-end justify-between gap-4 px-5 space-y-8'>
+    <div className='px-5 space-y-8'>
+      <div className='flex items-end justify-between gap-4'>
         <div>
           <h1 className='text-5xl sm:w-6xl font-bold gradient-title capitalize'>{account.name}</h1>
           <p className='text-muted-foreground'>{account.type.charAt(0) + account.type.slice(1).toLowerCase()} Account</p>
