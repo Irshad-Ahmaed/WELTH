@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -13,26 +13,68 @@ import { format } from 'date-fns';
 import { categoryColors } from '@/app/data/categories';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
-import { Clock, RefreshCw } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, MoreHorizontalIcon, RefreshCw, Search } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
 
-const RECURRING_INTERVALS={
+const RECURRING_INTERVALS = {
   DAILY: "Daily",
   WEEKLY: "Weekly",
   MONTHLY: "Monthly",
   YEARLY: "Yearly"
-}
+};
 
 const TransactionsTable = ({ transactions }) => {
+  const router = useRouter();
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [sortConfig, setSortConfig] = useState({
+    field: "date",
+    direction: "desc",
+  });
+
+  const [searchTerms, setSearchTerms] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [recurringFilter, setRecurringFilter] = useState("");
 
   const filteredAndSortedTransactions = transactions;
-  console.log('filteredAndSortedTransactions', filteredAndSortedTransactions);
 
-  const handleSort = () => { };
+  const handleSort = (field) => {
+    setSortConfig((current) => ({
+      field,
+      direction: current.field == field && current.direction == "asc" ? "desc" : "asc",
+    }));
+  };
+
+  const handleSelect = (id) => {
+    setSelectedIds(current => current.includes(id) ? current.filter(item => item != id) : [...current, id]);
+  };
+
+  const handleSelectAll = () => {
+    setSelectedIds((current)=>
+      current.length === filteredAndSortedTransactions.length ?
+      []
+      :
+      filteredAndSortedTransactions.map((t)=> t.id)
+    );
+  };
+
+  console.log('selectedIds', selectedIds.length);
 
   return (
     <div className='space-y-4'>
-
       {/* Filters */}
+      <div className='flex flex-col sm:flex-row gap-4'>
+        <div className='relative flex-1'>
+          <Search className='absolute left-2 top-2.5 size-4 text-muted-foreground'/>
+          <Input placeholder="Search transactions..." value={searchTerms} 
+            onChange={(e)=> setSearchTerms(e.target.value)} className={'pl-8'}
+          />
+        </div>
+
+        <div></div>
+      </div>
 
       {/* Transaction Table */}
       <div className='rounded-md border'>
@@ -40,19 +82,30 @@ const TransactionsTable = ({ transactions }) => {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">
-                <Checkbox />
+                <Checkbox onCheckedChange={()=> handleSelectAll()}
+                  checked={selectedIds.length === filteredAndSortedTransactions.length && filteredAndSortedTransactions.length > 0}
+                />
               </TableHead>
               <TableHead onClick={() => handleSort("date")} className={'cursor-pointer'}>
-                <div className='flex items-center'>Date</div>
+                <div className='flex items-center'>Date {sortConfig.field == 'date' && (
+                  sortConfig.direction === "asc" ? <ChevronUp className='size-4 ml-1' />
+                    : <ChevronDown className='size-4 ml-1' />
+                )}</div>
               </TableHead>
               <TableHead>
                 Description
               </TableHead>
               <TableHead onClick={() => handleSort("category")} className={'cursor-pointer'}>
-                <div className='flex items-center'>Category</div>
+                <div className='flex items-center'>Category {sortConfig.field == 'category' && (
+                  sortConfig.direction === "asc" ? <ChevronUp className='size-4 ml-1' />
+                    : <ChevronDown className='size-4 ml-1' />
+                )}</div>
               </TableHead>
               <TableHead onClick={() => handleSort("amount")} className={'cursor-pointer'}>
-                <div className='flex items-center justify-end'>Amount</div>
+                <div className='flex items-center justify-end'>Amount {sortConfig.field == 'amount' && (
+                  sortConfig.direction === "asc" ? <ChevronUp className='size-4 ml-1' />
+                    : <ChevronDown className='size-4 ml-1' />
+                )}</div>
               </TableHead>
               <TableHead>
                 Recurring
@@ -70,9 +123,11 @@ const TransactionsTable = ({ transactions }) => {
               :
 
               filteredAndSortedTransactions.map((transaction) => (
-                <TableRow>
+                <TableRow key={transaction.id}>
                   <TableCell>
-                    <Checkbox />
+                    <Checkbox onCheckedChange={() => handleSelect(transaction.id)} 
+                      checked={selectedIds.includes(transaction.id)} 
+                    />
                   </TableCell>
 
                   <TableCell>{format(new Date(transaction.date), "PP")}</TableCell>
@@ -96,12 +151,12 @@ const TransactionsTable = ({ transactions }) => {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
-                              <Badge variant={'outline'} 
+                              <Badge variant={'outline'}
                                 className='gap-1 bg-purple-100 text-purple-700 hover:bg-purple-200'>
                                 <RefreshCw className='size-3' />
                                 {
                                   RECURRING_INTERVALS[
-                                    transaction.recurringInterval
+                                  transaction.recurringInterval
                                   ]
                                 }
                               </Badge>
@@ -123,6 +178,21 @@ const TransactionsTable = ({ transactions }) => {
                         </Badge>
                       )
                     }
+                  </TableCell>
+
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <Button variant={'ghost'} className={'size-8 p-0 cursor-pointer'}>
+                          <MoreHorizontalIcon className='size-4' />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => router.push(`/transaction/create?edit=${transaction.id}`)}>Edit</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className={'text-destructive'}>Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))
