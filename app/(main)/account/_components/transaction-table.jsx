@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -19,6 +19,11 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import _ from 'lodash';
+import useFetch from '@/hooks/use-fetch';
+import { bulkDeleteTransactions } from '@/actions/account';
+import { toast } from 'sonner';
+import { BarLoader } from 'react-spinners';
 
 const RECURRING_INTERVALS = {
   DAILY: "Daily",
@@ -38,7 +43,20 @@ const TransactionsTable = ({ transactions }) => {
   const [searchTerms, setSearchTerms] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [recurringFilter, setRecurringFilter] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
+  // Debouncing in Search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerms); // Update the debounced search after 300ms
+    }, 300);
+
+    return () => {
+      clearTimeout(handler); // Clear previous timeout if user types again
+    };
+  }, [searchTerms]);
+
+  // Filters Functionalities
   const filteredAndSortedTransactions = useMemo(() => {
     let result = [...transactions];
 
@@ -81,12 +99,12 @@ const TransactionsTable = ({ transactions }) => {
         default:
           comparison = 0;
       }
-      
+
       return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
 
     return result;
-  }, [transactions, searchTerms, typeFilter, recurringFilter, sortConfig]);
+  }, [transactions, debouncedSearch, typeFilter, recurringFilter, sortConfig]);
 
   const handleSort = (field) => {
     setSortConfig((current) => ({
@@ -108,7 +126,24 @@ const TransactionsTable = ({ transactions }) => {
     );
   };
 
-  const handleBulkDelete = () => { };
+  // ----- DELETE Transaction Function -------
+  const {loading: deleteLoading, fn: deleteFn, data: deleted} = useFetch(bulkDeleteTransactions);
+
+  const handleBulkDelete = async() => {
+    if(!window.confirm(`Are you sure you want to delete ${selectedIds.length} transactions`)){
+      return;
+    }
+
+    deleteFn(selectedIds);
+  };
+
+  useEffect(()=>{
+    if(deleted && !deleteLoading){
+      toast.error('Transactions deleted successfully')
+      setSelectedIds("");
+    }
+  }, [deleted, deleteLoading])
+  // ------------------------------------ 
 
   const handleClearFilter = () => {
     setSearchTerms("");
@@ -119,6 +154,7 @@ const TransactionsTable = ({ transactions }) => {
 
   return (
     <div className='space-y-4'>
+    {deleteLoading && <BarLoader className='mt-4' width={'100%'} color='#9333ea'/>}
       {/* Filters */}
       <div className='flex flex-col sm:flex-row gap-4'>
         <div className='relative flex-1'>
@@ -283,7 +319,11 @@ const TransactionsTable = ({ transactions }) => {
                       <DropdownMenuContent>
                         <DropdownMenuItem onClick={() => router.push(`/transaction/create?edit=${transaction.id}`)}>Edit</DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className={'text-destructive'}>Delete</DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className={'text-destructive'}
+                          onClick={()=> deleteFn([transaction.id])}>
+                          Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
