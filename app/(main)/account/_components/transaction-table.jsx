@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -32,13 +32,26 @@ const RECURRING_INTERVALS = {
   YEARLY: "Yearly"
 };
 
-const TransactionsTable = ({ transactions }) => {
+const TransactionsTable = ({ transactions}) => {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState([]);
   const [sortConfig, setSortConfig] = useState({
     field: "date",
     direction: "desc",
   });
+
+  // Pagination-----------------
+  const [currentPage, setCurrentPage] = useState(1);
+  const transactionsPerPage = 10; // Adjust based on preference
+
+  // Compute indices for slicing data
+  const indexOfLastTransaction = currentPage * transactionsPerPage;
+  const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
+  const currentTransactions = transactions.slice(indexOfFirstTransaction, indexOfLastTransaction);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(transactions.length / transactionsPerPage);
+  //                                                                  ------------------------------------ 
 
   const [searchTerms, setSearchTerms] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -58,7 +71,7 @@ const TransactionsTable = ({ transactions }) => {
 
   // Filters Functionalities
   const filteredAndSortedTransactions = useMemo(() => {
-    let result = [...transactions];
+    let result = [...currentTransactions];
 
     // Search Functionality
     if (searchTerms) {
@@ -104,7 +117,7 @@ const TransactionsTable = ({ transactions }) => {
     });
 
     return result;
-  }, [transactions, debouncedSearch, typeFilter, recurringFilter, sortConfig]);
+  }, [currentTransactions, debouncedSearch, typeFilter, recurringFilter, sortConfig]);
 
   const handleSort = (field) => {
     setSortConfig((current) => ({
@@ -127,22 +140,22 @@ const TransactionsTable = ({ transactions }) => {
   };
 
   // ----- DELETE Transaction Function -------
-  const {loading: deleteLoading, fn: deleteFn, data: deleted} = useFetch(bulkDeleteTransactions);
+  const { loading: deleteLoading, fn: deleteFn, data: deleted } = useFetch(bulkDeleteTransactions);
 
-  const handleBulkDelete = async() => {
-    if(!window.confirm(`Are you sure you want to delete ${selectedIds.length} transactions`)){
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${selectedIds.length} transactions`)) {
       return;
     }
 
     deleteFn(selectedIds);
   };
 
-  useEffect(()=>{
-    if(deleted && !deleteLoading){
-      toast.error('Transactions deleted successfully')
+  useEffect(() => {
+    if (deleted && !deleteLoading) {
+      toast.error('Transactions deleted successfully');
       setSelectedIds("");
     }
-  }, [deleted, deleteLoading])
+  }, [deleted, deleteLoading]);
   // ------------------------------------ 
 
   const handleClearFilter = () => {
@@ -154,7 +167,7 @@ const TransactionsTable = ({ transactions }) => {
 
   return (
     <div className='space-y-4'>
-    {deleteLoading && <BarLoader className='mt-4' width={'100%'} color='#9333ea'/>}
+      {deleteLoading && <BarLoader className='mt-4' width={'100%'} color='#9333ea' />}
       {/* Filters */}
       <div className='flex flex-col sm:flex-row gap-4'>
         <div className='relative flex-1'>
@@ -319,9 +332,9 @@ const TransactionsTable = ({ transactions }) => {
                       <DropdownMenuContent>
                         <DropdownMenuItem onClick={() => router.push(`/transaction/create?edit=${transaction.id}`)}>Edit</DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           className={'text-destructive'}
-                          onClick={()=> deleteFn([transaction.id])}>
+                          onClick={() => deleteFn([transaction.id])}>
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -333,6 +346,32 @@ const TransactionsTable = ({ transactions }) => {
             }
           </TableBody>
         </Table>
+      </div>
+
+      {/* Pagination In Frontend */}
+      <div className="flex items-center justify-center space-x-4 mt-6 text-muted-foreground">
+        {/* Previous Button */}
+        <button
+          onClick={() => setCurrentPage(currentPage - 1)}
+          disabled={currentPage <= 1}
+          className={`px-3 py-1 border text-black shadow rounded-full font-bold ${currentPage <= 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50 cursor-pointer"}`}
+        >
+          &lt;
+        </button>
+
+        {/* Page Info */}
+        <span className="text-l">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        {/* Next Button */}
+        <button
+          onClick={() => setCurrentPage(currentPage + 1)}
+          disabled={currentPage >= totalPages}
+          className={`px-3 py-1 border rounded-full shadow cursor-pointer font-bold text-black ${currentPage >= totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"}`}
+        >
+          &gt;
+        </button>
       </div>
 
     </div>
