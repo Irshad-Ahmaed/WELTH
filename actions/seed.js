@@ -3,7 +3,7 @@
 import { db } from "@/lib/prisma";
 import { subDays } from "date-fns";
 
-const ACCOUNT_ID = "5a2320da-4648-4886-9763-d053af7aa00c";
+const ACCOUNT_ID = "5e53931e-8e76-4bad-a1d3-a1c605cb3e64";
 const USER_ID = "cc720635-97c1-41ce-b60e-952cc85193fb";
 
 // Categories with their typical amount ranges
@@ -47,7 +47,7 @@ export async function seedTransactions() {
         const transactions = [];
         let totalBalance = 0;
 
-        for (let i = 90; i >= 0; i--) {
+        for (let i = 65; i >= 0; i--) {
             const date = subDays(new Date(), i);
 
             // Generate 1-3 transactions per day

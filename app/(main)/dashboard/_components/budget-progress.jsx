@@ -1,15 +1,16 @@
 "use client";
-import { updateBudget } from '@/actions/budget';
+import { toggleGlobalBudget, updateBudget} from '@/actions/budget';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
 import useFetch from '@/hooks/use-fetch';
 import { Check, Pencil, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-const BudgetProgress = ({ initialBudget, currentExpenses }) => {
+const BudgetProgress = ({ initialBudget, currentExpenses, account }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newBudget, setNewBudget] = useState(
     initialBudget?.amount?.toString() || ""
@@ -17,7 +18,8 @@ const BudgetProgress = ({ initialBudget, currentExpenses }) => {
 
   const percentageUse = initialBudget ? (currentExpenses / initialBudget.amount) * 100 : 0;
 
-  const {loading: isLoading, fn: updateBudgetFn, data: updatedBudget, error} = useFetch(updateBudget)
+  const {loading: isLoading, fn: updateBudgetFn, data: updatedBudget, error} = useFetch(updateBudget);
+  const {loading: isGlobalLoading, fn: updateGlobalBudgetFn, data: updatedGlobalBudget, errorGlobal} = useFetch(toggleGlobalBudget);
 
   const handleUpdateBudget = async() => {
     const amount = parseFloat(newBudget);
@@ -26,7 +28,11 @@ const BudgetProgress = ({ initialBudget, currentExpenses }) => {
       return;
     }
 
-    await updateBudgetFn(amount);
+    await updateBudgetFn(amount, account?.id);
+  }
+
+  const handleGlobalChange = async(budgetId, makeGlobal)=> {
+    await updateGlobalBudgetFn(budgetId, makeGlobal , account?.id);
   }
 
   useEffect(()=> {
@@ -42,6 +48,21 @@ const BudgetProgress = ({ initialBudget, currentExpenses }) => {
     }
   }, [error])
 
+  useEffect(()=> {
+    if(updatedGlobalBudget?.success && updatedGlobalBudget?.message === "Global"){
+      toast.success("Budget is set to Globally")
+    }
+    if(updatedGlobalBudget?.success && updatedGlobalBudget?.message === "NotGlobal"){
+      toast.warning("Budget is not longer Globally")
+    }
+  }, [updatedGlobalBudget]);
+
+  useEffect(()=> {
+    if(errorGlobal){
+      toast.error(errorGlobal.message || "Failed to update the budget")
+    }
+  }, [errorGlobal])
+
   const handleCancel = () => {
     setNewBudget(initialBudget?.amount?.toString() || "");
     setIsEditing(false);
@@ -52,7 +73,12 @@ const BudgetProgress = ({ initialBudget, currentExpenses }) => {
       <Card>
         <CardHeader className='flex flex-row items-start justify-between space-y-0 pb-2'>
           <div className='flex-1'>
-            <CardTitle>Monthly Budget (Default Account)</CardTitle>
+            <div className='flex items-center justify-between'>
+              <CardTitle>Monthly Budget (Default Account)</CardTitle>
+              <div>
+                {initialBudget && <Switch checked={initialBudget?.isGlobal} onClick={()=>handleGlobalChange(initialBudget?.id, !initialBudget?.isGlobal)} disabled={isGlobalLoading} className='cursor-pointer hover:shadow-blue-500 transition-shadow'/>}
+              </div>
+            </div>
             <div className='flex items-center gap-2 mt-1'>
               {isEditing ?
                 <div className='flex items-center gap-2'>

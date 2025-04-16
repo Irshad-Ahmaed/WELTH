@@ -22,7 +22,7 @@ async function Dashboard () {
       {/* Budget Progress */}
       {
         defaultAccount &&
-        <BudgetProgress initialBudget={budgetData?.budget} currentExpenses={budgetData?.currentExpense || 0}/>
+        <BudgetProgress initialBudget={budgetData?.budget} currentExpenses={budgetData?.currentExpense || 0} account={defaultAccount}/>
       }
       
       {/* Overview */}
