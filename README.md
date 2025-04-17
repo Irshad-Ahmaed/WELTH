@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 💸 Full Stack AI Finance Platform
 
-## Getting Started
+A modern full-stack finance management platform built with **Next.js**, **Supabase**, **Tailwind CSS**, **Prisma**, **Inngest**, **ArcJet**, and **Shadcn UI**.  
+Manage your finances, track transactions, and stay on top of your budget — all in one place.
 
-First, run the development server:
+---
+
+## ✨ Features
+
+- 🔐 **User Authentication** via Supabase
+- 🧾 **Transaction Tracking** with a clean, AI-enhanced UI
+- 🧮 **Multiple Account Support** — Users can create and manage several accounts
+- 📊 **Budget Management**
+  - Each account can have **one personal budget**
+  - Users can create a **global budget** that overrides individual budgets
+  - When a global budget is enabled, all account-specific budgets are disabled
+  - Disabling the global budget restores previously linked account budgets
+- 📧 **Budget Alert Emails** — Stay informed with smart budget notifications
+- 🧠 **AI-Assisted Insights** (planned)
+- 🛠️ **More powerful features coming soon...**
+
+---
+
+## 🖼️ UI Preview
+
+> Built with **Tailwind CSS** + **Shadcn UI** for a modern, responsive experience.
+
+*(Screenshots or GIFs here — if available)*
+
+---
+
+## 🏗️ Tech Stack
+
+| Layer         | Tech                                    |
+|--------------|------------------------------------------|
+| Frontend     | [Next.js](https://nextjs.org), [Shadcn UI](https://ui.shadcn.com), [Tailwind CSS](https://tailwindcss.com) |
+| Backend      | [Supabase](https://supabase.io), [Prisma](https://www.prisma.io), [Inngest](https://www.inngest.com), [ArcJet](https://arcjet.com) |
+| Database     | Supabase (PostgreSQL)                    |
+| Email Alerts | Supabase + Inngest workflows             |
+
+---
+
+## ENV Setup
+- DATABASE_URL=
+- DIRECT_URL=
+
+- NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+- CLERK_SECRET_KEY=
+- NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+- NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+- NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/onboarding
+- NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
+
+- GEMINI_API_KEY=
+
+- RESEND_API_KEY=
+
+- ARCJET_KEY=
+
+## 🧪 Running Locally
+
+1. **Clone the repository**
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Irshad-Ahmaed/WELTH
+cd welth 
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Install & Run**
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### After completing all the step successfully your app is running on http://localhost:3000 in your browser.
