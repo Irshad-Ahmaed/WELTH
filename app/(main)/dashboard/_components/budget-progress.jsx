@@ -9,6 +9,7 @@ import useFetch from '@/hooks/use-fetch';
 import { Check, Pencil, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { revalidateDashboard } from '../../_components/revalidate-dashboard';
 
 const BudgetProgress = ({ initialBudget, currentExpenses, account }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -29,10 +30,12 @@ const BudgetProgress = ({ initialBudget, currentExpenses, account }) => {
     }
 
     await updateBudgetFn(amount, account?.id);
+    await revalidateDashboard();
   }
 
   const handleGlobalChange = async(budgetId, makeGlobal)=> {
     await updateGlobalBudgetFn(budgetId, makeGlobal , account?.id);
+    await revalidateDashboard();
   }
 
   useEffect(()=> {

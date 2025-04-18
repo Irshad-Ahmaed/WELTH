@@ -7,6 +7,7 @@ import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect } from 'react';
 import { toast } from 'sonner';
+import { revalidateDashboard } from '../../_components/revalidate-dashboard';
 
 const AccountCard = ({ account }) => {
   const { name, type, balance, id, isDefault } = account;
@@ -22,6 +23,7 @@ const AccountCard = ({ account }) => {
     }
 
     await updateDefaultFn(id);
+    await revalidateDashboard();
   };
 
   useEffect(()=>{

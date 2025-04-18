@@ -190,7 +190,7 @@ export async function updateBudget(amount, accountId) {
             });
         }
 
-        revalidatePath('/dashboard');
+        // revalidatePath('/dashboard');
 
         return {
             success: true,
@@ -238,41 +238,43 @@ export async function toggleGlobalBudget(budgetId, makeGlobal, accountId) {
                 },
             });
 
-            revalidatePath('/dashboard');
+            // revalidatePath('/dashboard');
             return {
                 success: true,
                 message: "Global",
                 data: { ...updated, amount: updated.amount.toNumber() },
             };
         }
-
         // Else Part ---------------------
-        let budgetD = await db.budget.findFirst({
-            where: {
-                userId: user.id,
-                isGlobal: true,
-            }
-        });
-        // Unsetting global: assign it to a specific account
-        if (!budgetD?.id) throw new Error("accountId is required when unsetting global");
+        else {
+            let budgetD = await db.budget.findFirst({
+                where: {
+                    userId: user.id,
+                    isGlobal: true,
+                }
+            });
+            // Unsetting global: assign it to a specific account
+            if (!budgetD?.id) throw new Error("accountId is required when unsetting global");
 
-        const updated = await db.budget.update({
-            where: {
-                userId: user.id,
-                id: budgetD?.id,
-                isGlobal: true,
-            },
-            data: {
-                isGlobal: false,
-            },
-        });
+            const updated = await db.budget.update({
+                where: {
+                    userId: user.id,
+                    id: budgetD?.id,
+                    isGlobal: true,
+                },
+                data: {
+                    isGlobal: false,
+                },
+            });
 
-        revalidatePath('/dashboard');
-        return {
-            success: true,
-            message: "NotGlobal",
-            data: { ...updated, amount: updated.amount.toNumber() },
-        };
+            // revalidatePath('/dashboard');
+            return {
+                success: true,
+                message: "NotGlobal",
+                data: { ...updated, amount: updated.amount.toNumber() },
+            };
+        }
+
     } catch (error) {
         console.error("Error toggling global budget:", error);
         return { success: false, error: error.message };
