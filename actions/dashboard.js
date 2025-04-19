@@ -55,7 +55,7 @@ export async function createAccount(data) {
         const serializedAccount = serializedTransaction(account);
 
         // It's allow you to call all api calls ones again in dashboard page // Kind of refresh
-        revalidatePath("/dashboard");
+        // revalidatePath("/dashboard");
         return { success: true, data: serializedAccount };
     } catch (error) {
         throw new Error("Error While Creating account details", error.message);

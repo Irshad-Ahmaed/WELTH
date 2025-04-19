@@ -19,6 +19,7 @@ import useFetch from "@/hooks/use-fetch";
 import { createAccount } from "@/actions/dashboard";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { revalidateDashboard } from "@/app/(main)/_components/revalidate-dashboard";
 
 const CreateAccountDrawer = ({ children }) => {
     const [open, setOpen] = useState(false);
@@ -37,6 +38,7 @@ const CreateAccountDrawer = ({ children }) => {
     const onSubmit = async(data) => {
         console.log('data', data);
         await createAccountFn(data);
+        await revalidateDashboard();
     }
 
     // If there is any data received 
