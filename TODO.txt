@@ -1,0 +1,1 @@
+- If Budget is global, then all the accounts transaction will reflect on that budget.
